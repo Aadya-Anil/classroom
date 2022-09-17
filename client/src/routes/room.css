@@ -1,4 +1,14 @@
+
 .bench_connect{
     background-color: aqua;
-    margin-left: 15px;
+    margin: 15px;
+    flex-basis: 100%;
+}
+
+.room {
+    background: #c4ddf5;
+}
+
+Video {
+    margin-left: 20px;
 }

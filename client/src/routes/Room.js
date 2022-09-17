@@ -5,19 +5,26 @@ import styled from "styled-components";
 import { ReactDOM } from "react";
 import TabSwitch from "./TabFocus";
 import './room.css';
+import Hero from '../routes/Hero';
+
+import fire from "../fire.js";
 
 const Container = styled.div`
-    padding: 20px;
-    display: flex;
+    padding: 40px;
+    display:flex;
     height: 100vh;
-    width: 90%;
+    width: 100%;
     margin: auto;
     flex-wrap: wrap;
 `;
 
 const StyledVideo = styled.video`
     height: 30%;
-    width: 20%;
+    width: 30%;
+    border: 1px solid;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
 `;
 
 const StyledVideo2 = styled.video`
@@ -40,7 +47,9 @@ const Video = (props) => {
     }, []);
     return (
         <StyledVideo playsInline autoPlay ref={ref} />
+
     );
+    this.props.muted ="true";
 }
 
 
@@ -128,18 +137,28 @@ const Room = (props) => {
     {
 
     }
+
+    /*const handleLogout = () => {
+        fire.auth().signOut();
+    };*/
+
+  
     
 
     return (
-        <Container>
+        <Container className="room">
             <StyledVideo2 muted ref={userVideo} autoPlay playsInline />
             {peers.map((peer, index) => {
                 var n=index;
                 return (
+
                     <><Video key={index} peer={peer} />
-                    <h2>{index}</h2>
+                    <div className="index"><h2>{index}</h2></div>
                     <TabSwitch></TabSwitch>
-                    <div>
+                    <div className="but">
+                <button onClick={()=>{window.open('https://classroompeer.netlify.app','_blank', 'noopener,noreferrer');}}>Get into Voice Channel</button>
+            </div>
+                    <div className="connection">
                     {n%2!=0?(
                         <h2 className="bench_connect">{n-1} and {n} are connected</h2>)
                     :(<h2></h2>)}

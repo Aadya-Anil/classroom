@@ -1,20 +1,115 @@
 import React from "react";
 import { v1 as uuid } from "uuid";
-import { useState } from "react";
-import '../routes/CreateRoom.css';
+//import { useState } from "react";
+//import '../routes/CreateRoom.css';
 import GoogleButton from 'react-google-button'
 import {useHistory} from 'react-router-dom';
+//import React from "react";
+import fire from "../fire";
+import Login from "./Login";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { useState,useEffect } from "react";
+//import CreateRoom from "./CreateRoom";
+import Room from "./Room";
+import Hero from "./Hero";
+import '../routes/authentication.css';
 
 
 const CreateRoom = (props) => {
     const [Pass,setPass] = useState("")
     const history = useHistory();
+    const [user,setUser] = useState('');
+    const [email,setEmail] = useState('');
+    const [password,setPassword] = useState('');
+    const [emailError,setEmailError] = useState('');
+    const [passwordError,setPasswordError] = useState('');
+    const [hasAccount,setHasAccount] = useState(false);
+
+    const clearInputs = () => {
+        setEmail('');
+        setPassword('');
+    }
+
+    const clearErrors = () => {
+        setEmailError('');
+        setPasswordError('');
+    }
+
+    const handleLogin = () => {
+        clearErrors();
+        fire
+            .auth()
+            .signInWithEmailAndPassword(email,password)
+            /*.then(() =>{
+                return(
+                    <Hero />
+                )
+            })*/
+                
+
+            /*.then((user) => {
+                if (user) {
+                    {const id = uuid();
+                        props.history.push(`/room/${id}`);
+                     }
+                }
+              })*/
+            .catch(err => {
+                switch (err.code) {
+                    case "auth/invalid-email":
+                    case "auth/user-disabled":
+                    case "auth/user-not-found":
+                        setEmailError(err.message);
+                        break;
+                    case "auth/wrong-password":
+                        setPasswordError(err.message);
+                        break;
+                }
+            });
+    };
+
+    const handleSignup = () => {
+        clearErrors();
+        fire
+            .auth()
+            .createUserWithEmailAndPassword(email,password)
+            .catch(err => {
+                switch (err.code) {
+                    case "auth/email-aldready-in-use":
+                    case "auth/invalid-email":
+                        setEmailError(err.message);
+                        break;
+                    case "auth/weak-password":
+                        setPasswordError(err.message);
+                        break;
+                }
+            });
+    };
+
+    const handleLogout = () => {
+        fire.auth().signOut();
+    };
+
+    const authListener = () => {
+        fire.auth().onAuthStateChanged((user) => {
+            if (user) {
+                clearInputs();
+                setUser(user);
+            } else {
+                setUser("");
+            }
+        });
+    };
+
+    useEffect(() => {
+        authListener();
+    }, []);
 
     function create() {
         console.log(Pass)
-        if(Pass=='pass')
+        if(1==1)
         {const id = uuid();
-            props.history.push(`/room/${id}`);
+           props.history.push(`/room/${id}`);
         }
         else
         {
@@ -23,15 +118,58 @@ const CreateRoom = (props) => {
         
     }
 
+    function cli() {
+        handleSignup();
+        create();
+    }
+
+    function clic() {
+        handleLogin();
+        authListener();
+        create();
+    }
+
     return (
         <>
         <div className="contain">
-        <h1>Classroom 2.0</h1>
+        <h1 className="classroom">Classroom 2.0</h1>
+        <section className="login">
+            <div className="loginContainer">
+                <label>Username</label>
+                <input type="text" autoFocus required value={email} onChange={(e) => setEmail(e.target.value)}/>
+                <p className="errorMsg">{emailError}</p>
+                <label>Password</label>
+                <input type="text" required value={password} onChange={(e) => setPassword(e.target.value)}/>
+                <p className="errorMsg">{passwordError}</p>
+                <div className="btnContainer">
+                    {   hasAccount ? (
+                        <>
+                        <button onClick={clic}>Sign In and Create Room</button>
+                        <p>Don't have an account? <span onClick={() => setHasAccount(!hasAccount)}>Sign Up</span></p>
+                        </>
+                    ) : (
+                        <>
+                        <button onClick={cli}>Sign Up and Create Room</button>
+                        <p>Have an account? <span onClick={() => setHasAccount(!hasAccount)}>Sign In</span></p>
+                        </>
+                    )
+
+                    }
+
+                </div>
+            </div>
+        </section>
         
-        <input type="text" placeholder="Username" className="inputbox"></input>
-        <input type="password" placeholder="Password" className="inputbox" onChange={e=>{setPass(e.target.value)}}></input>
-        <button onClick={create} className="submitbutton">Create room</button>
-        <GoogleButton type="dark" className="submitbutton" onClick={()=>{window.location.replace('https://accounts.google.com/signin/v2/identifier?flowName=GlifWebSignIn&flowEntry=ServiceLogin');}}></GoogleButton>
+
+        <div className="Fire">
+            {
+                user ? (
+                    <Room />
+                ) : (
+                    <Login handleLogout={handleLogout}/>
+                    )
+            }
+        </div>
         </div>
         </>
     );
